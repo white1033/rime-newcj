@@ -10,8 +10,8 @@ schema:
     - 自由大新倉頡
   description: |
     自由大新倉頡
-#  dependencies:
-#    - luna_quanpin
+  dependencies:
+    - luna_pinyin
 
 switches:
   - name: ascii_mode
@@ -40,62 +40,80 @@ engine:
     - ascii_segmentor
     - matcher
     - abc_segmentor
+    - affix_segmentor@pinyin
     - punct_segmentor
     - fallback_segmentor
   translators:
     - punct_translator
 #    - reverse_lookup_translator
     - table_translator
+    - script_translator@pinyin
   filters:
     - simplifier
     - uniquifier
     - single_char_filter
+    - reverse_lookup_filter@reverse_lookup_newcj
 
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcba,./;?[]'
   delimiter: " "
   auto_select: true
-  max_code_length: 5  # 五碼頂字上屏
+  max_code_length: 6  # 五碼頂字上屏
 
 translator:
   dictionary: newcj
   enable_charset_filter: true
   enable_sentence: false
   enable_user_dict: false
-#  enable_encoder: true
+  # enable_encoder: true
   encode_commit_history: true
   max_phrase_length: 5
   preedit_format:
-  #  - 'xform/^([a-z]*)$/$1\t（\U$1\E）/'
-    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ|"
-  #  - "xlit|ABCDEFGHIJKLMNOPQRSTUVWXYZ|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜重|"
+    # - 'xform/^([a-z]*)$/$1\t（\U$1\E）/'
+    # - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ|"
+    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+    # - "xlit|ABCDEFGHIJKLMNOPQRSTUVWXYZ|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜重|"
   comment_format:
-    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ|"
-  #  - "xlit|abcdefghijklmnopqrstuvwxyz~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ～|"
-  disable_user_dict_for_patterns:
-    - "^z.*$"
-    - "^yyy.*$"
+    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+    # - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ|"
+    # - "xlit|abcdefghijklmnopqrstuvwxyz~|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜Ｚ～|"
+  # disable_user_dict_for_patterns:
+  #   - "^z.*$"
+  #   - "^yyy.*$"
 
-#abc_segmentor:
-#  extra_tags:
-#    - reverse_lookup  # 與拼音（反查碼）混打
+abc_segmentor:
+ extra_tags:
+   - reverse_lookup_newcj  # 與拼音（反查碼）混打
 
-#reverse_lookup:
-#  dictionary: luna_pinyin
-#  prism: luna_quanpin
-#  prefix: "`"
-#  suffix: "'"
-#  tips: 〔拼音〕
-#  preedit_format:
-#    - xform/([nl])v/$1ü/
-#    - xform/([nl])ue/$1üe/
-#    - xform/([jqxy])v/$1u/
-#  comment_format:
-#    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜符|"
+reverse_lookup_newcj:
+  dictionary: newcj
+  preedit_format: []
+  comment_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
 
-#simplifier:
-#  opencc_config: t2tw.json
-#  option_name: zh_tw
+pinyin:
+  tag: pinyin
+  prefix: "`"
+  suffix: "'"
+  dictionary: luna_pinyin
+  # prism: luna_pinyin
+  preedit_format: &pinyin
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  comment_format:	#menu 提示 字碼 顯示
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+  tips: 【拼音反查】
+  closing_tips: 【大新倉頡】
+  initial_quality: 0.2	# 調整該編譯器出字優先度
+
+pinyin_reverse_lookup:
+  tags: [ pinyin ]
+  # dictionary: newcj
+  overwrite_comment: true  # 覆蓋其他提示
+  comment_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+
 
 simplifier:
   tips: all  # 簡化字模式下提示對應的傳統漢字
@@ -167,4 +185,4 @@ recognizer:
   import_preset: default
   patterns:
     punct: '^/([0-9]0?|[A-Za-z]+)$'
-    reverse_lookup: "`[a-z]*'?$|[a-z]+'$"
+    pinyin: "`[a-z]*'?$"
